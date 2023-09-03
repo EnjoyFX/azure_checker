@@ -1,3 +1,4 @@
+import logging
 import os
 
 from flask import Flask, jsonify
@@ -5,22 +6,27 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
 app = Flask(__name__)
+logger = logging.getLogger(__file__)
 
 
 @app.route('/')
 def hello():
+    logger.warning("requested root")
     return "Hi, this is a simple Azure API using Flask!"
 
 
 @app.route('/list-blobs')
 def list_blobs():
+    logger.warning("requested list_blobs")
     credential = DefaultAzureCredential()
 
     blob_storage_url = os.environ.get("BLOB_STORAGE_URL")
     container_name = os.environ.get("CONTAINER_NAME")
+
     if not blob_storage_url or not container_name:
         error_message = "Missing required environment variables: " \
                         "BLOB_STORAGE_URL, CONTAINER_NAME"
+        logger.error(f"Missing required environment variables")
         return jsonify({"error": error_message}), 400
 
     try:
@@ -37,4 +43,5 @@ def list_blobs():
 
 
 if __name__ == '__main__':
+    logger.warning("main.app() starting...")
     app.run(host='0.0.0.0', port=80)
